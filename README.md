@@ -1,4 +1,3 @@
-# AAIMPACT-Project
 
 ================================================================================
     ESG DATA EXTRACTOR - Automated Sustainability Indicator Extraction
@@ -85,15 +84,6 @@ Example output:
   AIB,2024,Total Scope 1 GHG Emissions,2858.0,tCO₂e,0.95
   BBVA,2024,Gender Pay Gap,28.3,%,1.00
   BPCE,2024,Board Meetings,6.0,count/year,0.90
-
-
-LIMITATIONS
-===========
-
-- Works best with structured ESG/sustainability reports
-- Accuracy varies by report format (60-90%)
-- Needs internet for LLM API
-- Some indicators hard to find (e.g., collective bargaining coverage)
 
 
 TROUBLESHOOTING
