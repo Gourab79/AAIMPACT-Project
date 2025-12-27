@@ -1,5 +1,6 @@
 """
-RAG-based Sustainability Indicator Extraction Engine - 90%+ Accuracy
+RAG-based Sustainability Indicator Extraction Engine
+Multi-query retrieval with Groq LLM
 """
 import os
 import json
@@ -8,19 +9,10 @@ from typing import Optional, List, Dict, Tuple
 from dataclasses import dataclass
 import time
 
-try:
-    from groq import Groq
-    GROQ_AVAILABLE = True
-except ImportError:
-    GROQ_AVAILABLE = False
-
-try:
-    from sentence_transformers import SentenceTransformer
-    import numpy as np
-    import faiss
-    EMBEDDING_AVAILABLE = True
-except ImportError:
-    EMBEDDING_AVAILABLE = False
+from groq import Groq
+from sentence_transformers import SentenceTransformer
+import numpy as np
+import faiss
 
 
 @dataclass
@@ -38,7 +30,7 @@ class ExtractionResult:
 
 
 class RAGExtractor:
-    """RAG-based extraction using embeddings + Groq LLM - 90%+ accuracy"""
+    """RAG-based extraction with multi-query retrieval"""
     
     def __init__(
         self,
@@ -54,51 +46,45 @@ class RAGExtractor:
         self.top_k = top_k
         self.llm_model = llm_model
         
-        # Initialize LLM clients FIRST
-        self.llm_clients = []
+        # Initialize Groq clients with multiple API keys
+        self.groq_clients = []
         self.current_key_index = 0
         self.key_stats = []
         
+        for i, api_key in enumerate(api_keys):
+            if api_key and not api_key.startswith("gsk_YOUR"):
+                try:
+                    client = Groq(api_key=api_key)
+                    self.groq_clients.append(client)
+                    self.key_stats.append({"requests": 0, "rate_limits": 0, "is_active": True})
+                    print(f"✓ Groq API Key #{i+1} ready")
+                except Exception as e:
+                    print(f"⚠ Groq API Key #{i+1} failed: {e}")
+        
+        if not self.groq_clients:
+            print("⚠ No valid Groq API keys - get one at https://console.groq.com")
+        
         # Initialize embedding model
-        if EMBEDDING_AVAILABLE:
-            print(f"📦 Loading embedding model: {embedding_model}...")
-            os.environ['HF_HUB_DISABLE_IMPLICIT_TOKEN'] = '1'
-            
-            try:
-                self.embedder = SentenceTransformer(
-                    embedding_model,
-                    trust_remote_code=True,
-                    token=False
-                )
-                print(f"✓ Embedding model loaded")
-            except Exception as e:
-                print(f"⚠ Error loading model: {e}")
-                self.embedder = None
-        else:
+        print(f"📦 Loading embedding model: {embedding_model}...")
+        os.environ['HF_HUB_DISABLE_IMPLICIT_TOKEN'] = '1'
+        
+        try:
+            self.embedder = SentenceTransformer(
+                embedding_model,
+                trust_remote_code=True,
+                token=False
+            )
+            print(f"✓ Embedding model loaded")
+        except Exception as e:
+            print(f"⚠ Error loading model: {e}")
             self.embedder = None
-            print("⚠ Install: pip install sentence-transformers faiss-cpu")
-        
-        # Initialize Groq clients
-        if GROQ_AVAILABLE:
-            for i, api_key in enumerate(api_keys):
-                if api_key and not api_key.startswith("gsk_YOUR") and len(api_key) > 20:
-                    try:
-                        client = Groq(api_key=api_key)
-                        self.llm_clients.append(client)
-                        self.key_stats.append({"requests": 0, "rate_limits": 0, "is_active": True})
-                        print(f"✓ Groq API Key #{i+1} ready")
-                    except Exception as e:
-                        print(f"⚠ API Key #{i+1} failed: {e}")
-        
-        if not self.llm_clients:
-            print("⚠ No valid Groq API keys - set them in config.py")
         
         # Vector store
         self.chunks = []
         self.chunk_metadata = []
         self.index = None
         self.document_embedded = False
-
+    
     def chunk_document(self, text: str) -> List[str]:
         """Split document into overlapping chunks"""
         chunks = []
@@ -150,7 +136,7 @@ class RAGExtractor:
         return True
     
     def retrieve_relevant_chunks(self, query: str, top_k: int = None) -> List[Tuple[str, Dict, float]]:
-        """Retrieve most relevant chunks for a query"""
+        """Retrieve most relevant chunks"""
         
         if not self.document_embedded:
             return []
@@ -171,38 +157,34 @@ class RAGExtractor:
     
     def generate_multi_queries(self, indicator: Dict) -> List[str]:
         """Generate multiple query variations"""
-        keywords = indicator['keywords'][:5]  # Use top 5 keywords
+        keywords = indicator['keywords'][:5]
         
         return [
-            # Query 1: Full formal name
             f"{indicator['name']} {indicator['unit']} 2024 {' '.join(keywords[:3])}",
-            # Query 2: Keywords focused
             f"{' '.join(keywords[:3])} {indicator['unit']}",
-            # Query 3: Context based
             f"{indicator.get('context', '')} {indicator['name']}",
-            # Query 4: Alternative phrasing
             f"total {indicator['name'].lower()} {indicator['unit']} latest"
         ]
     
     def _get_active_client(self):
-        """Get current active LLM client"""
-        if not self.llm_clients:
+        """Get current active Groq client"""
+        if not self.groq_clients:
             return None, -1
         
         if self.key_stats[self.current_key_index]["is_active"]:
-            return self.llm_clients[self.current_key_index], self.current_key_index
+            return self.groq_clients[self.current_key_index], self.current_key_index
         
-        for i in range(len(self.llm_clients)):
+        for i in range(len(self.groq_clients)):
             if self.key_stats[i]["is_active"]:
                 self.current_key_index = i
-                return self.llm_clients[i], i
+                return self.groq_clients[i], i
         
         return None, -1
     
     def _switch_to_next_key(self):
         """Switch to next API key"""
-        for _ in range(len(self.llm_clients)):
-            self.current_key_index = (self.current_key_index + 1) % len(self.llm_clients)
+        for _ in range(len(self.groq_clients)):
+            self.current_key_index = (self.current_key_index + 1) % len(self.groq_clients)
             if self.key_stats[self.current_key_index]["is_active"]:
                 return True
         return False
@@ -213,7 +195,7 @@ class RAGExtractor:
         if not self.document_embedded:
             return self._empty_result(indicator, "Not embedded")
         
-        # Multi-query retrieval for better recall
+        # Multi-query retrieval
         queries = self.generate_multi_queries(indicator)
         all_chunks = []
         
@@ -221,7 +203,7 @@ class RAGExtractor:
             chunks = self.retrieve_relevant_chunks(query, top_k=8)
             all_chunks.extend(chunks)
         
-        # Deduplicate and keep best scores
+        # Deduplicate
         seen = {}
         for chunk, meta, score in all_chunks:
             chunk_id = meta['chunk_id']
@@ -234,7 +216,7 @@ class RAGExtractor:
         if not unique_chunks:
             return self._empty_result(indicator, "No chunks found")
         
-        # Use top 5 chunks for LLM
+        # Use top 5 chunks
         top_chunks = unique_chunks[:5]
         combined_text = "\n\n---CHUNK---\n\n".join([chunk for chunk, _, _ in top_chunks])
         
@@ -246,13 +228,13 @@ class RAGExtractor:
             return self._extract_with_enhanced_regex(combined_text, indicator)
     
     def _extract_with_enhanced_llm(self, text: str, indicator: Dict, retry_count: int = 0) -> ExtractionResult:
-        """Extract using LLM with enhanced validation prompt"""
+        """Extract using LLM (Groq)"""
         
         client, key_index = self._get_active_client()
         if not client:
             return self._extract_with_enhanced_regex(text, indicator)
         
-        # Enhanced prompt with strict validation
+        # Build prompt
         prompt = f"""You are a sustainability data extraction expert. Extract ONLY 2024 data.
 
 INDICATOR: {indicator['name']}
@@ -267,7 +249,6 @@ STRICT VALIDATION RULES:
 2. Unit MUST match "{indicator['unit']}" exactly
 3. For percentages (%): return just the number (e.g., 45.5, not "45.5%")
 4. For € millions: If you see "billion" or "bn", multiply by 1000
-   - Example: "€5.1 billion" = 5100 (if unit is "€ millions")
 5. For counts: Use whole numbers only
 6. For years: Return 4-digit year (e.g., 2050)
 7. Confidence rules:
@@ -275,10 +256,6 @@ STRICT VALIDATION RULES:
    - 0.7-0.9: 2024 value but unit conversion needed
    - 0.5-0.7: Value found but year unclear
    - < 0.5: Estimated or indirect reference
-8. REJECT if:
-   - Year is not 2024
-   - Unit doesn't match after conversion
-   - Value is clearly wrong (e.g., negative %, >100 for %)
 
 Return ONLY this JSON (no extra text):
 {{
@@ -289,24 +266,24 @@ Return ONLY this JSON (no extra text):
   "raw_text": "<exact sentence with the value>"
 }}
 
-If not found or fails validation: {{"value": null, "confidence": 0.0, "source_section": "Not found", "notes": "Not in text", "raw_text": ""}}
+If not found: {{"value": null, "confidence": 0.0, "source_section": "Not found", "notes": "Not in text", "raw_text": ""}}
 """
         
         try:
             response = client.chat.completions.create(
                 model=self.llm_model,
                 messages=[
-                    {"role": "system", "content": "You are a precise data extractor. Return ONLY valid JSON. Follow all validation rules."},
+                    {"role": "system", "content": "You are a precise data extractor. Return ONLY valid JSON."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.0,
                 max_tokens=700
             )
             
-            self.key_stats[key_index]["requests"] += 1
             result_text = response.choices[0].message.content.strip()
+            self.key_stats[key_index]["requests"] += 1
             
-            # Extract JSON
+            # Parse JSON response
             json_match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', result_text, re.DOTALL)
             if json_match:
                 data = json.loads(json_match.group())
@@ -315,7 +292,7 @@ If not found or fails validation: {{"value": null, "confidence": 0.0, "source_se
                 
                 # Post-processing validation
                 if value is not None:
-                    # Reject year values unless unit is "year"
+                    # Reject if value is a year but unit is not "year"
                     if 2015 <= value <= 2030 and indicator['unit'] != 'year':
                         value = None
                         confidence = 0.0
@@ -324,7 +301,7 @@ If not found or fails validation: {{"value": null, "confidence": 0.0, "source_se
                     if '%' in indicator['unit'] and (value < 0 or value > 100):
                         confidence *= 0.5
                     
-                    # Validate counts (must be non-negative integers)
+                    # Validate counts
                     if 'count' in indicator['unit'].lower() and value < 0:
                         value = None
                         confidence = 0.0
@@ -350,16 +327,14 @@ If not found or fails validation: {{"value": null, "confidence": 0.0, "source_se
                 if self._switch_to_next_key() and retry_count < 2:
                     return self._extract_with_enhanced_llm(text, indicator, retry_count + 1)
                 else:
-                    print(f"\n  ⏳ All keys rate-limited, waiting 60s...")
+                    print(f"\n  ⏳ Rate limited, waiting 60s...")
                     time.sleep(60)
                     self.current_key_index = 0
-                    if retry_count < 1:
-                        return self._extract_with_enhanced_llm(text, indicator, retry_count + 1)
         
         return self._extract_with_enhanced_regex(text, indicator)
     
     def _extract_with_enhanced_regex(self, text: str, indicator: Dict) -> ExtractionResult:
-        """Enhanced regex fallback with better number extraction"""
+        """Enhanced regex fallback"""
         text_lower = text.lower()
         
         for keyword in indicator['keywords']:
@@ -367,7 +342,6 @@ If not found or fails validation: {{"value": null, "confidence": 0.0, "source_se
                 pos = text_lower.find(keyword.lower())
                 context = text[max(0, pos-250):min(len(text), pos+650)]
                 
-                # Multiple number patterns
                 patterns = [
                     r'([0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]+)?)\s*(?:billion|bn)',
                     r'([0-9]{1,3}(?:,?[0-9]{3})*\.[0-9]+)',
@@ -382,23 +356,21 @@ If not found or fails validation: {{"value": null, "confidence": 0.0, "source_se
                             value_str = matches[0].replace(',', '')
                             value = float(value_str)
                             
-                            # Unit conversions
                             if ('billion' in context.lower() or ' bn' in context.lower()) and indicator['unit'] == '€ millions':
                                 value *= 1000
                             
-                            # Validation
                             if 2015 <= value <= 2030 and indicator['unit'] != 'year':
-                                continue  # Skip year values
+                                continue
                             
                             if '%' in indicator['unit'] and (value < 0 or value > 100):
-                                continue  # Skip invalid percentages
+                                continue
                             
                             return ExtractionResult(
                                 indicator_id=indicator['id'],
                                 indicator_name=indicator['name'],
                                 value=value,
                                 unit=indicator['unit'],
-                                confidence=0.55,  # Higher regex confidence
+                                confidence=0.55,
                                 source_page=None,
                                 source_section="Regex (enhanced)",
                                 notes=f"Found near '{keyword}'",
@@ -429,7 +401,7 @@ If not found or fails validation: {{"value": null, "confidence": 0.0, "source_se
         results = []
         total = len(indicators)
         
-        print(f"\n🔍 Extracting {total} indicators (90%+ accuracy mode)...\n")
+        print(f"\n🔍 Extracting {total} indicators...\n")
         
         for i, indicator in enumerate(indicators, 1):
             print(f"[{i}/{total}] {indicator['name']}...", end=' ', flush=True)
