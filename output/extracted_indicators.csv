@@ -1,0 +1,61 @@
+company,report_year,indicator_id,indicator_name,value,unit,confidence,source_page,source_section,notes
+AIB,2024,1,Total Scope 1 GHG Emissions,,tCO₂e,0.0,,Not found,Not found in any section
+AIB,2024,2,Total Scope 2 GHG Emissions,,tCO₂e,0.0,,Not found,Not found in any section
+AIB,2024,3,Total Scope 3 GHG Emissions,,tCO₂e,0.0,,Not found,Not found in any section
+AIB,2024,4,GHG Emissions Intensity,,tCO₂e per €M revenue,0.0,,Not found,Not found in any section
+AIB,2024,5,Total Energy Consumption,2024.0,MWh or GJ,0.3,78.0,Regex extraction,Found near 'energy consumption'
+AIB,2024,6,Renewable Energy Percentage,,%,0.0,,Not found,Not found in any section
+AIB,2024,7,Net Zero Target Year,2050.0,year,0.99,48.0,SBM-1,Most recent Net Zero target year mentioned for the lending portfolio
+AIB,2024,8,Green Financing Volume,5100.0,€ millions,0.99,66.0,During 2024,"2024, €5.1bn green and transition lending (35% of new lending)"
+AIB,2024,9,Total Employees,,FTE,0.0,,Not found,Not found in any section
+AIB,2024,10,Female Employees,,%,0.0,,Not found,Not found in any section
+AIB,2024,11,Gender Pay Gap,17.8,%,0.99,94.0,Gender Pay Gap Report,2024 snapshot (30 June 2024) mean Gender Pay Gap for AIB ROI
+AIB,2024,12,Training Hours per Employee,,hours,0.0,,Not found,Not found in any section
+AIB,2024,13,Employee Turnover Rate,,%,0.0,,Not found,Not found in any section
+AIB,2024,14,Work-Related Accidents,,count,0.0,,Not found,Not found in any section
+AIB,2024,15,Collective Bargaining Coverage,,%,0.0,,Not found,Not found in any section
+AIB,2024,16,Board Female Representation,40.0,%,0.99,127.0,Board Diversity Policy,2024 Governance Report – percentage of females on the Board stood at 40% (target at least 40% female).
+AIB,2024,17,Board Meetings,,count/year,0.0,,Not found,Not found in any section
+AIB,2024,18,Corruption Incidents,,count,0.0,,Not found,Not found in any section
+AIB,2024,19,Avg Payment Period to Suppliers,,days,0.0,,Not found,Not found in any section
+AIB,2024,20,Suppliers Screened for ESG,,%,0.0,,Not found,Not found in any section
+BBVA,2024,1,Total Scope 1 GHG Emissions,,tCO₂e,0.0,,Not found,Not found in any section
+BBVA,2024,2,Total Scope 2 GHG Emissions,198679.0,tCO₂e,0.98,355.0,"GHG EMISSIONS BROKEN DOWN BY SCOPE 1, 2 AND 3 (EXCEPT FINANCED EMISSIONS) (BBVA GROUP)",2024 (estimated) gross location‑based Scope 2 GHG emissions in tCO₂e
+BBVA,2024,3,Total Scope 3 GHG Emissions,,tCO₂e,0.0,,Not found,Not found in any section
+BBVA,2024,4,GHG Emissions Intensity,4.0,tCO₂e per €M revenue,0.3,321.0,Regex extraction,Found near 'emissions intensity'
+BBVA,2024,5,Total Energy Consumption,,MWh or GJ,0.0,,Not found,Not found in any section
+BBVA,2024,6,Renewable Energy Percentage,,%,0.0,,Not found,Not found in any section
+BBVA,2024,7,Net Zero Target Year,,year,0.0,,Not found,Not found in any section
+BBVA,2024,8,Green Financing Volume,600.0,€ millions,0.98,297.0,Bonds,"2024, green bonds placed"
+BBVA,2024,9,Total Employees,,FTE,0.0,,Not found,Not found in any section
+BBVA,2024,10,Female Employees,35.4,%,0.95,375.0,Management team,"2024 data, as of December 31, 2024"
+BBVA,2024,11,Gender Pay Gap,28.3,%,0.99,386.0,Gross pay gap,"2024, average gross gender pay gap for BBVA Group"
+BBVA,2024,12,Training Hours per Employee,,hours,0.0,,Not found,Not found in any section
+BBVA,2024,13,Employee Turnover Rate,11.5,%,0.99,405.0,TOTAL TURNOVER RATE AND DISTRIBUTION BY GENDER,2024 overall group total employee turnover rate
+BBVA,2024,14,Work-Related Accidents,,count,0.0,,Not found,Not found in any section
+BBVA,2024,15,Collective Bargaining Coverage,43.0,%,0.98,394.0,3.1.4 Labor rights,Group-level collective bargaining coverage; no specific year mentioned in the excerpt.
+BBVA,2024,16,Board Female Representation,,%,0.0,,Not found,Not found in any section
+BBVA,2024,17,Board Meetings,,count/year,0.0,,Not found,Not found in any section
+BBVA,2024,18,Corruption Incidents,,count,0.0,,Not found,Not found in any section
+BBVA,2024,19,Avg Payment Period to Suppliers,,days,0.0,,Not found,Not found in any section
+BBVA,2024,20,Suppliers Screened for ESG,,%,0.0,,Not found,Not found in any section
+BPCE,2024,1,Total Scope 1 GHG Emissions,544000.0,tCO₂e,0.75,125.0,OWN FOOTPRINT,2024 value for own footprint emissions (interpreted as Scope 1)
+BPCE,2024,2,Total Scope 2 GHG Emissions,18152.0,tCO₂e,0.98,142.0,"2.2.4.2 (E1-6) GROSS SCOPES 1, 2, 3 AND TOTAL GHG EMISSIONS",Most recent gross Scope 2 GHG emissions (location‑based) reported for 12/31/2024
+BPCE,2024,3,Total Scope 3 GHG Emissions,,tCO₂e,0.0,,Not found,Not found in any section
+BPCE,2024,4,GHG Emissions Intensity,,tCO₂e per €M revenue,0.0,,Not found,Not found in any section
+BPCE,2024,5,Total Energy Consumption,,MWh or GJ,0.0,,Not found,Not found in any section
+BPCE,2024,6,Renewable Energy Percentage,,%,0.0,,Not found,Not found in any section
+BPCE,2024,7,Net Zero Target Year,2050.0,year,0.98,58.0,Environmental impact,Target year 2050 for achieving a carbon‑neutral economy
+BPCE,2024,8,Green Financing Volume,,€ millions,0.0,,Not found,Not found in any section
+BPCE,2024,9,Total Employees,1063.0,FTE,0.99,40.0,2024 KEY FIGURES,"2024, Banque Palatine employee count"
+BPCE,2024,10,Female Employees,,%,0.0,,Not found,Not found in any section
+BPCE,2024,11,Gender Pay Gap,34.1,%,1.0,179.0,3.1.5.12 (S1-16) REMUNERATION METRICS (PAY GAP AND TOTAL REMUNERATION),"2024 sustainability report, Natixis scope gender pay gap"
+BPCE,2024,12,Training Hours per Employee,36.0,hours,0.98,176.0,Training hours completed in 2024,2024 average number of training hours per employee (overall) as reported in the training and skills development metric.
+BPCE,2024,13,Employee Turnover Rate,8.72,%,1.0,324.0,G. Employee turnover during the reference period,"2024 sustainability report, permanent staff turnover rate"
+BPCE,2024,14,Work-Related Accidents,,count,0.0,,Not found,Not found in any section
+BPCE,2024,15,Collective Bargaining Coverage,,%,0.0,,Not found,Not found in any section
+BPCE,2024,16,Board Female Representation,,%,0.0,,Not found,Not found in any section
+BPCE,2024,17,Board Meetings,4.0,count/year,0.95,75.0,Board,2024 – Chairman of the Management Board holds 4 sessions per year (board meetings)
+BPCE,2024,18,Corruption Incidents,,count,0.0,,Not found,Not found in any section
+BPCE,2024,19,Avg Payment Period to Suppliers,,days,0.0,,Not found,Not found in any section
+BPCE,2024,20,Suppliers Screened for ESG,,%,0.0,,Not found,Not found in any section
